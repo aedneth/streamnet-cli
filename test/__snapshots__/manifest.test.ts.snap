@@ -1,0 +1,71 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`manifest > is a stable, serializable shape (snapshot of command ids + flags) 1`] = `
+[
+  {
+    "args": [
+      "query",
+    ],
+    "flags": [
+      "container",
+      "indexer",
+      "limit",
+      "min-seeders",
+      "quality",
+    ],
+    "id": "search",
+  },
+  {
+    "args": [
+      "source",
+    ],
+    "flags": [
+      "file-index",
+      "no-subs",
+      "port",
+      "sub-lang",
+    ],
+    "id": "stream",
+  },
+  {
+    "args": [
+      "query",
+    ],
+    "flags": [
+      "container",
+      "min-seeders",
+      "no-subs",
+      "quality",
+      "yes",
+    ],
+    "id": "play",
+  },
+  {
+    "args": [],
+    "flags": [
+      "check",
+      "yes",
+    ],
+    "id": "setup",
+  },
+  {
+    "args": [],
+    "flags": [],
+    "id": "doctor",
+  },
+  {
+    "args": [
+      "subcommand",
+      "key",
+      "value",
+    ],
+    "flags": [],
+    "id": "config",
+  },
+  {
+    "args": [],
+    "flags": [],
+    "id": "manifest",
+  },
+]
+`;

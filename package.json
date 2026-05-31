@@ -1,0 +1,83 @@
+{
+  "name": "streamnet-cli",
+  "version": "0.1.0",
+  "description": "Torrent search + in-process WebTorrent streaming to native VLC with hash-based subtitles. Agent-native by design.",
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "author": "Eduardo Borjas <eduardoa.borjas@gmail.com>",
+  "homepage": "https://github.com/eduardoborjas/streamnet-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eduardoborjas/streamnet-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eduardoborjas/streamnet-cli/issues"
+  },
+  "keywords": [
+    "torrent",
+    "webtorrent",
+    "vlc",
+    "streaming",
+    "subtitles",
+    "opensubtitles",
+    "cli",
+    "agent-native",
+    "mcp",
+    "korvex"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "streamnet": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "LICENSE-COMMERCIAL",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.2",
+    "cheerio": "^1.0.0",
+    "execa": "^9.5.1",
+    "p-limit": "^6.1.0",
+    "fast-xml-parser": "^4.5.0",
+    "picocolors": "^1.1.1"
+  },
+  "optionalDependencies": {
+    "webtorrent": "^2.5.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@types/node": "^20.16.0",
+    "@typescript-eslint/eslint-plugin": "^8.13.0",
+    "@typescript-eslint/parser": "^8.13.0",
+    "@vitest/coverage-v8": "^2.1.4",
+    "eslint": "^9.14.0",
+    "prettier": "^3.3.3",
+    "tsup": "^8.3.5",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.4"
+  }
+}
