@@ -86,36 +86,41 @@ export class OutputContext {
   }
 
   /**
-   * Emit the terminal result for a command. In JSON mode this writes the single
-   * stdout envelope; in human mode it invokes the provided renderer.
+   * Emit the terminal result for a command. In JSON mode writes the stdout
+   * envelope and awaits the OS pipe flush before returning; in human mode
+   * invokes the renderer synchronously. Must be awaited before process.exit().
    */
-  emit<T>(command: string, version: string, data: T, render: (data: T) => void): void {
+  async emit<T>(command: string, version: string, data: T, render: (data: T) => void): Promise<void> {
     if (this.mode === 'json') {
-      process.stdout.write(
-        JSON.stringify(successEnvelope(command, version, data)) + '\n',
-      );
+      await this.writeLine(JSON.stringify(successEnvelope(command, version, data)));
     } else {
       render(data);
     }
   }
 
-  /** Emit a failure envelope (JSON) or a human error line. */
-  emitError(
+  /** Emit a failure envelope or human error line. Must be awaited before process.exit(). */
+  async emitError(
     command: string,
     version: string,
     error: { code: ExitCode; message: string; hint?: string },
-  ): void {
+  ): Promise<void> {
     if (this.mode === 'json') {
-      process.stdout.write(JSON.stringify(errorEnvelope(command, version, error)) + '\n');
+      await this.writeLine(JSON.stringify(errorEnvelope(command, version, error)));
     } else {
       this.error(error.message);
       if (error.hint) this.log(this.paint(pc.dim, '  ' + error.hint));
     }
   }
 
-  /** Raw envelope passthrough (used by `manifest` which builds its own data). */
-  emitEnvelope(envelope: Envelope): void {
-    process.stdout.write(JSON.stringify(envelope) + '\n');
+  /** Raw envelope passthrough. Must be awaited before process.exit(). */
+  async emitEnvelope(envelope: Envelope): Promise<void> {
+    await this.writeLine(JSON.stringify(envelope));
+  }
+
+  private writeLine(s: string): Promise<void> {
+    return new Promise((resolve, reject) =>
+      process.stdout.write(s + '\n', (err) => (err ? reject(err) : resolve())),
+    );
   }
 }
 

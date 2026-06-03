@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import type { CommandSpec, CommandContext } from './types.js';
 import { ExitCode, StreamNetError, fail } from '../agent/exit.js';
-import { errorEnvelope } from '../agent/envelope.js';
 
 /**
  * Wire a CommandSpec onto a Commander Command, binding:
@@ -32,9 +31,6 @@ export function buildCommand(spec: CommandSpec, ctx: () => CommandContext): Comm
       ? `${short}--${flag.long}`
       : `${short}--${flag.long} <value>`;
     cmd.option(syntax, flag.description, flag.default as string | undefined);
-    if (flag.env) {
-      // Commander doesn't natively bind env; we handle it in the action below.
-    }
   }
 
   if (spec.examples?.length) {
@@ -46,7 +42,6 @@ export function buildCommand(spec: CommandSpec, ctx: () => CommandContext): Comm
 
   cmd.action(async (...actionArgs: unknown[]) => {
     const context = ctx();
-    const start = Date.now();
 
     // Build input: positional args + resolved flags (env overrides first).
     const positionals = actionArgs.slice(0, (spec.args ?? []).length) as string[];
@@ -55,37 +50,27 @@ export function buildCommand(spec: CommandSpec, ctx: () => CommandContext): Comm
 
     try {
       const data = await spec.handler(context, input);
-      context.output.emit(spec.id, context.version, data, (d) => {
+      // await ensures the OS pipe buffer is flushed before process.exit()
+      await context.output.emit(spec.id, context.version, data, (d) => {
         if (spec.render) {
           spec.render(d, context.output);
         } else {
-          // Human-mode default: pretty-print the data as JSON.
           process.stdout.write(JSON.stringify(d, null, 2) + '\n');
         }
       });
       const exitCode = spec.exitCodeFor ? spec.exitCodeFor(data) : ExitCode.OK;
       process.exit(exitCode);
     } catch (err) {
-      const durationMs = Date.now() - start;
       const sne =
         err instanceof StreamNetError
           ? err
           : new StreamNetError(ExitCode.ERROR, String(err));
 
-      if (context.output.mode === 'json') {
-        process.stdout.write(
-          JSON.stringify(
-            errorEnvelope(
-              spec.id,
-              context.version,
-              { code: sne.code, message: sne.message, hint: sne.hint },
-              durationMs,
-            ),
-          ) + '\n',
-        );
-      } else {
-        context.output.emitError(spec.id, context.version, sne);
-      }
+      await context.output.emitError(spec.id, context.version, {
+        code: sne.code,
+        message: sne.message,
+        hint: sne.hint,
+      });
       process.exit(sne.code);
     }
   });
@@ -110,10 +95,12 @@ function buildInput(
   for (const flag of spec.flags ?? []) {
     const envVal = flag.env ? process.env[flag.env] : undefined;
     const cliVal = opts[camel(flag.long)];
+    const typeName = flag.schema._def?.typeName as string | undefined;
     if (envVal !== undefined) {
-      input[camel(flag.long)] = coerceEnv(envVal);
+      input[camel(flag.long)] = coerceEnv(envVal, typeName);
     } else if (cliVal !== undefined) {
-      input[camel(flag.long)] = cliVal;
+      // Coerce string values for numeric flags (Commander always gives strings)
+      input[camel(flag.long)] = typeName === 'ZodNumber' ? coerceNum(cliVal, flag.long) : cliVal;
     } else if (flag.default !== undefined) {
       input[camel(flag.long)] = flag.default;
     }
@@ -122,10 +109,17 @@ function buildInput(
   return input;
 }
 
-function coerceEnv(val: string): unknown {
+function coerceEnv(val: string, typeName: string | undefined): unknown {
   if (val === '1' || val === 'true') return true;
   if (val === '0' || val === 'false') return false;
+  if (typeName === 'ZodNumber') return coerceNum(val, '');
   return val;
+}
+
+function coerceNum(val: unknown, flagName: string): number {
+  const n = Number(val);
+  if (Number.isNaN(n)) fail(ExitCode.USAGE, `--${flagName} requires a numeric value, got: ${String(val)}`);
+  return n;
 }
 
 function camel(s: string): string {

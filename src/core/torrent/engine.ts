@@ -1,4 +1,4 @@
-import { ExitCode, fail } from '../../agent/exit.js';
+import { ExitCode, StreamNetError, fail } from '../../agent/exit.js';
 import { logger } from '../../util/logger.js';
 import { selectVideoFile } from './select.js';
 
@@ -54,8 +54,12 @@ export async function startStream(opts: StreamOptions): Promise<TorrentStreamInf
 
     const timer = setTimeout(() => {
       client.destroy();
-      const e = new StreamNetTimeoutError();
-      reject(e);
+      reject(
+        new StreamNetError(
+          ExitCode.TORRENT_UNPLAYABLE,
+          'Torrent metadata timed out — no peers responded.',
+        ),
+      );
     }, metaTimeout);
 
     if (opts.signal) {
@@ -64,7 +68,7 @@ export async function startStream(opts: StreamOptions): Promise<TorrentStreamInf
         () => {
           clearTimeout(timer);
           client.destroy();
-          reject(new Error('Aborted'));
+          reject(new StreamNetError(ExitCode.TORRENT_UNPLAYABLE, 'Stream aborted.'));
         },
         { once: true },
       );
@@ -85,7 +89,12 @@ export async function startStream(opts: StreamOptions): Promise<TorrentStreamInf
       const file = torrent.files[fileIndex];
       if (!file) {
         client.destroy();
-        reject(new Error(`File index ${fileIndex} not found in torrent`));
+        reject(
+          new StreamNetError(
+            ExitCode.TORRENT_UNPLAYABLE,
+            `File index ${fileIndex} not found in torrent.`,
+          ),
+        );
         return;
       }
 
@@ -145,12 +154,4 @@ interface WebTorrentInstance {
   add(src: string, cb: (t: TorrentHandle) => void): void;
   on(event: string, cb: (e: Error) => void): void;
   destroy(): void;
-}
-
-class StreamNetTimeoutError extends Error {
-  code = ExitCode.TORRENT_UNPLAYABLE;
-  constructor() {
-    super('Torrent metadata timed out — no peers responded.');
-    this.name = 'StreamNetError';
-  }
 }

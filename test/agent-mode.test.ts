@@ -54,7 +54,8 @@ maybe('agent mode (subprocess, no TTY)', () => {
     expect(code).toBe(2);
   });
 
-  it('doctor exits non-zero when a dependency is missing but still emits valid JSON', async () => {
+  // doctor makes a live network call to verify indexer reachability; allow up to 15s
+  it('doctor exits non-zero when a dependency is missing but still emits valid JSON', { timeout: 15_000 }, async () => {
     const { stdout, code } = await run(['doctor', '--json']);
     const env = JSON.parse(stdout.trim());
     expect(env.command).toBe('doctor');

@@ -1,4 +1,4 @@
-import { ExitCode, fail } from '../agent/exit.js';
+import { ExitCode, StreamNetError, fail } from '../agent/exit.js';
 
 const DEFAULT_UA =
   'Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0';
@@ -40,6 +40,7 @@ export async function httpGet(url: string, opts: FetchOptions = {}): Promise<Res
     }
     return res;
   } catch (err) {
+    if (err instanceof StreamNetError) throw err;
     if (err instanceof Error && err.name === 'AbortError') {
       fail(ExitCode.NETWORK, `Request timed out after ${timeout}ms: ${url}`);
     }

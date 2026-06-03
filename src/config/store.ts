@@ -57,6 +57,11 @@ export function getConfigValue(config: Config, key: string): unknown {
  */
 export function setConfigValue(config: Config, key: string, value: string): Config {
   const parts = key.split('.');
+  for (const part of parts) {
+    if (part === '__proto__' || part === 'constructor' || part === 'prototype') {
+      fail(ExitCode.CONFIG, `Invalid config key segment: "${part}"`);
+    }
+  }
   const draft = structuredClone(config) as Record<string, unknown>;
   let cursor = draft;
   for (let i = 0; i < parts.length - 1; i++) {

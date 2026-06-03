@@ -47,14 +47,14 @@ describe('aggregateSearch', () => {
   };
 
   it('merges results from multiple indexers', async () => {
-    const merged = await aggregateSearch('q', [idxA, idxB]);
-    const hashes = merged.map((r) => r.infoHash).sort();
+    const { results } = await aggregateSearch('q', [idxA, idxB]);
+    const hashes = results.map((r) => r.infoHash).sort();
     expect(hashes).toEqual(['hash1', 'hash2', 'hash3']);
   });
 
   it('dedupes by infoHash keeping the higher seeder count', async () => {
-    const merged = await aggregateSearch('q', [idxA, idxB]);
-    const hash1 = merged.find((r) => r.infoHash === 'hash1');
+    const { results } = await aggregateSearch('q', [idxA, idxB]);
+    const hash1 = results.find((r) => r.infoHash === 'hash1');
     expect(hash1?.seeders).toBe(50);
     expect(hash1?.indexer).toBe('b');
   });
@@ -67,7 +67,8 @@ describe('aggregateSearch', () => {
         throw new Error('network down');
       }),
     };
-    const merged = await aggregateSearch('q', [idxA, broken]);
-    expect(merged.length).toBe(2); // still got idxA's results
+    const { results, failedCount } = await aggregateSearch('q', [idxA, broken]);
+    expect(results.length).toBe(2); // still got idxA's results
+    expect(failedCount).toBe(1);
   });
 });
