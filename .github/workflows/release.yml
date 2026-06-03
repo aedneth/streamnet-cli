@@ -4,29 +4,56 @@ on:
   push:
     tags: ['v*']
 
-permissions:
-  contents: write
-  id-token: write
+permissions: {}
 
 jobs:
   npm-publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
-          node-version: 20
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
+        with:
+          node-version: '22'
           registry-url: https://registry.npmjs.org
           cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - run: npm publish --provenance --access public
+
+      - name: Install dependencies (zero-trust)
+        run: npm ci --ignore-scripts
+
+      - name: Rebuild native WebTorrent dependencies
+        run: |
+          npm rebuild utp-native bufferutil utf-8-validate 2>/dev/null || true
+          npm rebuild node-datachannel fs-native-extensions 2>/dev/null || true
+        env:
+          npm_config_ignore_scripts: 'false'
+
+      # See ci.yml note: ip patched via overrides, audit-level=critical until webtorrent upstream fix
+      - name: Dependency security audit
+        run: npm audit --audit-level=critical
+
+      - name: Type check + Test + Build
+        run: npm run typecheck && npm test && npm run build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
+        with:
+          generate_release_notes: true
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   binaries:
     needs: npm-publish
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -39,14 +66,27 @@ jobs:
             target: win-x64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
-          node-version: 20
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
+        with:
+          node-version: '22'
           cache: npm
-      - run: npm ci
-      - run: npm run build
-      # Node SEA (Single Executable Application) bundling is wired up in v0.6.
-      # Placeholder step keeps the matrix valid until then.
+
+      - name: Install dependencies (zero-trust)
+        run: npm ci --ignore-scripts
+
+      - name: Rebuild native WebTorrent dependencies
+        run: |
+          npm rebuild utp-native bufferutil utf-8-validate 2>/dev/null || true
+          npm rebuild node-datachannel fs-native-extensions 2>/dev/null || true
+        env:
+          npm_config_ignore_scripts: 'false'
+
+      - name: Build
+        run: npm run build
+
       - name: Package standalone binary
         run: echo "SEA packaging for ${{ matrix.target }} lands in v0.6"
