@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest an idea or improvement
+title: '[feat]: '
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to do that's hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like streamnet to do? Include the command surface if relevant.
+    validations:
+      required: true
+  - type: checkboxes
+    id: agent-native
+    attributes:
+      label: Agent-native considerations
+      description: New commands must work for both humans and agents.
+      options:
+        - label: This feature should expose a `--json` output
+        - label: This feature should have a non-interactive (`--yes` / flags) path
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

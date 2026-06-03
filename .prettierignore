@@ -1,0 +1,8 @@
+dist/
+coverage/
+node_modules/
+LICENSE
+LICENSE-COMMERCIAL
+CODE_OF_CONDUCT.md
+docs/planning/
+*.snap

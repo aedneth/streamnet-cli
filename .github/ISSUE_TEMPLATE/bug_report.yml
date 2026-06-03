@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a problem with streamnet-cli
+title: '[bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug! Please run `streamnet doctor --json` and include
+        the output — it captures most of what we need.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including the exact command you ran.
+      placeholder: 'streamnet play "..." --yes  →  exited with code 7'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: streamnet doctor --json
+      render: json
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: streamnet version
+      placeholder: '0.1.0'
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux (Ubuntu/Pop!_OS/Debian)
+        - Linux (Fedora/RHEL)
+        - Linux (Arch)
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Output from `--verbose`, or the log file under your data dir.
+      render: shell
