@@ -12,6 +12,9 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    # CodeQL requires GitHub Advanced Security (GHAS). Skip on private repos
+    # until the repo is made public — the workflow stays here for that transition.
+    if: github.event.repository.private == false
     permissions:
       actions: read
       contents: read

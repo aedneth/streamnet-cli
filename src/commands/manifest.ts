@@ -117,7 +117,13 @@ export async function manifestHandler(
 ): Promise<ManifestResult> {
   const manifest = buildManifest(specs, ctx.version);
 
-  // Always emit as JSON regardless of --json flag — manifest IS the machine interface
-  process.stdout.write(JSON.stringify(manifest, null, 2) + '\n');
+  // Always emit as JSON regardless of --json flag — manifest IS the machine interface.
+  // Awaited write: process.stdout.write is async when stdout is a pipe; without the
+  // callback, process.exit() in the caller can race the OS buffer flush on macOS/Node 20.
+  await new Promise<void>((resolve, reject) =>
+    process.stdout.write(JSON.stringify(manifest, null, 2) + '\n', (err) =>
+      err ? reject(err) : resolve(),
+    ),
+  );
   return manifest;
 }
