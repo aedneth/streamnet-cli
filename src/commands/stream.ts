@@ -55,32 +55,35 @@ export async function streamHandler(
   ctx.output.success(`Streaming: ${info.fileName} (${formatBytes(info.sizeBytes)})`);
   ctx.output.info(`Local URL: ${info.streamUrl}`);
 
-  let subtitleFile: string | undefined;
-  const skipSubs = input.noSubs || isMkv(info.fileName);
+  try {
+    let subtitleFile: string | undefined;
+    const skipSubs = input.noSubs || isMkv(info.fileName);
 
-  if (!skipSubs) {
-    // Subtitle search happens in v0.3; for now inform the user
-    ctx.output.info('Non-MKV file detected. Subtitle search will be added in v0.3.');
+    if (!skipSubs) {
+      // Subtitle search happens in v0.3; for now inform the user
+      ctx.output.info('Non-MKV file detected. Subtitle search will be added in v0.3.');
+    }
+
+    const vlcProc = spawnVlc({
+      streamUrl: info.streamUrl,
+      subFile: subtitleFile,
+      title: info.fileName,
+    });
+    ctx.output.success(`VLC launched: ${vlcProc.vlcPath}`);
+
+    const vlcExitCode = await waitForVlc(vlcProc);
+
+    return {
+      streamUrl: info.streamUrl,
+      fileName: info.fileName,
+      fileIndex: info.fileIndex,
+      sizeBytes: info.sizeBytes,
+      subtitleFile,
+      vlcExitCode,
+    };
+  } finally {
+    info.destroy();
   }
-
-  const vlcProc = spawnVlc({
-    streamUrl: info.streamUrl,
-    subFile: subtitleFile,
-    title: info.fileName,
-  });
-  ctx.output.success(`VLC launched: ${vlcProc.vlcPath}`);
-
-  const vlcExitCode = await waitForVlc(vlcProc);
-  info.destroy();
-
-  return {
-    streamUrl: info.streamUrl,
-    fileName: info.fileName,
-    fileIndex: info.fileIndex,
-    sizeBytes: info.sizeBytes,
-    subtitleFile,
-    vlcExitCode,
-  };
 }
 
 export function renderStream(data: StreamResult, output: OutputContext): void {

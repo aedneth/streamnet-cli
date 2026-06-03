@@ -47,7 +47,7 @@ export async function configHandler(
       if (input.value === undefined)
         fail(ExitCode.USAGE, '`config set` requires a value.');
       const updated = setConfigValue(ctx.config, input.key, input.value);
-      saveConfig(updated, process.env.STREAMNET_CONFIG);
+      saveConfig(updated, ctx.configPath);
       return { subcommand: 'set', key: input.key, value: input.value };
     }
 

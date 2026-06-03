@@ -7,15 +7,25 @@ export interface AggregateOptions extends IndexerSearchOptions {
   concurrency?: number;
 }
 
+export interface AggregateResult {
+  results: TorrentResult[];
+  /** Number of indexers that returned results. */
+  succeededCount: number;
+  /** Number of indexers that threw or rejected. */
+  failedCount: number;
+}
+
 /**
  * Fan-out a search across multiple indexers in parallel, then merge and
  * de-duplicate results by infoHash (keeping the entry with more seeders).
+ * Returns success/failure counts so callers can distinguish NO_RESULTS from
+ * NETWORK (all indexers failed).
  */
 export async function aggregateSearch(
   query: string,
   indexers: Indexer[],
   opts: AggregateOptions = {},
-): Promise<TorrentResult[]> {
+): Promise<AggregateResult> {
   const limit = pLimit(opts.concurrency ?? 3);
 
   const settled = await Promise.allSettled(
@@ -28,17 +38,19 @@ export async function aggregateSearch(
   );
 
   const all: TorrentResult[] = [];
+  let failedCount = 0;
   for (let i = 0; i < settled.length; i++) {
     const result = settled[i]!;
     if (result.status === 'fulfilled') {
       logger.debug(`[${indexers[i]!.id}] returned ${result.value.length} results`);
       all.push(...result.value);
     } else {
+      failedCount++;
       logger.warn(`[${indexers[i]!.id}] failed: ${String(result.reason)}`);
     }
   }
 
-  return dedupe(all);
+  return { results: dedupe(all), succeededCount: indexers.length - failedCount, failedCount };
 }
 
 /** Deduplicate by infoHash — keep the entry with more seeders. */

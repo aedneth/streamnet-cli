@@ -43,7 +43,13 @@ export async function searchHandler(
 
   ctx.output.info(`Searching ${indexers.map((i) => i.id).join(', ')} for "${query}"…`);
 
-  const raw = await aggregateSearch(query, indexers, { limit: input.limit ?? 25 });
+  const { results: raw, failedCount } = await aggregateSearch(query, indexers, {
+    limit: input.limit ?? 25,
+  });
+
+  if (failedCount === indexers.length) {
+    fail(ExitCode.NETWORK, 'All indexers failed — check your network connection.');
+  }
 
   const minSeeders = input.minSeeders ?? ctx.config.minSeeders;
   let ranked = rankResults(raw, {

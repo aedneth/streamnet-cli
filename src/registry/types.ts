@@ -8,6 +8,8 @@ export interface CommandContext {
   output: OutputContext;
   config: Config;
   version: string;
+  /** Resolved path to the active config file (honours --config and STREAMNET_CONFIG). */
+  configPath: string;
 }
 
 export interface ExitCodeEntry {
