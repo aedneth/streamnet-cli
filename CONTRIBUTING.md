@@ -5,7 +5,7 @@ Thanks for your interest in improving StreamNet CLI!
 ## Development setup
 
 ```bash
-git clone https://github.com/eduardoborjas/streamnet-cli.git
+git clone https://github.com/aedneth/streamnet-cli.git
 cd streamnet-cli
 npm install
 npm run build
