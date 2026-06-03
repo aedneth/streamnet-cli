@@ -7,7 +7,8 @@
 Replaces the fragile `.torrent → Stremio → VLC → VLSub` pipeline with a single,
 scriptable command. No GUI. No Flatpak. No legacy dependency chain.
 
-[![CI](https://github.com/eduardoborjas/streamnet-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/eduardoborjas/streamnet-cli/actions/workflows/ci.yml)
+[![CI](https://github.com/aedneth/streamnet-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/aedneth/streamnet-cli/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/aedneth/streamnet-cli?label=release)](https://github.com/aedneth/streamnet-cli/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](https://nodejs.org)
 
@@ -52,7 +53,7 @@ DeepSeek) on Linux, macOS, and Windows:
 npm install -g streamnet-cli
 
 # or grab a standalone binary (no Node required)
-# https://github.com/eduardoborjas/streamnet-cli/releases
+# https://github.com/aedneth/streamnet-cli/releases
 ```
 
 Then install native VLC and verify:
@@ -88,6 +89,28 @@ streamnet search "obscure title" --json || case $? in
 esac
 ```
 
+## Demo
+
+```
+$ streamnet play "Blade Runner 2049" --yes
+  Searching 2 indexers... done (14 results)
+  Ranking by health: MKV-first, seeders, ratio
+  ✔ Selected  Blade.Runner.2049.2017.2160p.UHD.BluRay.MKV  ▸  1847 seeders
+  Streaming   magnet:?xt=urn:btih:a3f1… → localhost:38427
+  ✔ Launched  VLC (/usr/bin/vlc) with stream URL
+  ✔ Subtitles not needed — MKV has embedded English track
+
+$ streamnet search "Dune 2" --json | jq '.data[0] | {title, seeders, container}'
+{
+  "title": "Dune.Part.Two.2024.2160p.UHD.BluRay.MKV",
+  "seeders": 3241,
+  "container": "mkv"
+}
+
+$ streamnet doctor --json | jq '.data.allOk'
+true
+```
+
 ## Exit codes
 
 | Code | Name               | Meaning                                     |
@@ -116,6 +139,20 @@ streamnet config set minSeeders 5
 streamnet config set preferredContainers mkv,mp4
 streamnet config get opensubtitles.apiKey   # secrets are redacted on display
 ```
+
+## Roadmap
+
+| Version | Status | Highlights |
+| ------- | ------ | ---------- |
+| **v0.1.0** | ✅ shipped | Search (torrents-csv + YTS), WebTorrent engine, native VLC spawn, setup/doctor, agent-native `--json` / exit codes / manifest |
+| **v0.2.0** | planned | OpenSubtitles hash-based subtitle fetch + VLC injection; MCP server (`streamnet mcp`) |
+| **v0.3.0** | planned | Real-debrid / Premiumize resolver; additional indexers (1337x, RARBG mirrors) |
+| **v0.4.0** | planned | Watch history + resume; `streamnet library` catalog; shell completions |
+| **v1.0.0** | future | Stable public API, binary releases, Homebrew tap, Scoop bucket |
+
+## Contributing
+
+Bug reports, feature requests, and PRs are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
 
 ## License — AGPL-3.0 + Dual Commercial (final)
 

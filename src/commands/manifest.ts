@@ -103,8 +103,8 @@ export function buildManifest(specs: CommandSpec[], version: string): ManifestRe
       })),
     installHints: {
       npm: 'npm install -g streamnet-cli',
-      binary: 'https://github.com/eduardoborjas/streamnet-cli/releases',
-      homebrew: 'brew install eduardoborjas/tap/streamnet (v1.0)',
+      binary: 'https://github.com/aedneth/streamnet-cli/releases',
+      homebrew: 'brew install aedneth/tap/streamnet (v1.0)',
       scoop: 'scoop install streamnet (v1.0)',
     },
   };

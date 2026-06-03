@@ -5,13 +5,13 @@
   "type": "module",
   "license": "AGPL-3.0-or-later",
   "author": "Eduardo Borjas <eduardoa.borjas@gmail.com>",
-  "homepage": "https://github.com/eduardoborjas/streamnet-cli",
+  "homepage": "https://github.com/aedneth/streamnet-cli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eduardoborjas/streamnet-cli.git"
+    "url": "https://github.com/aedneth/streamnet-cli.git"
   },
   "bugs": {
-    "url": "https://github.com/eduardoborjas/streamnet-cli/issues"
+    "url": "https://github.com/aedneth/streamnet-cli/issues"
   },
   "keywords": [
     "torrent",
