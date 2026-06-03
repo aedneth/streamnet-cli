@@ -1,0 +1,60 @@
+# StreamNet CLI — Commercial License
+
+StreamNet CLI is dual-licensed.
+
+## 1. Open-source license (default)
+
+StreamNet CLI is released to the public under the **GNU Affero General Public
+License, version 3.0 (AGPL-3.0)** — see the [`LICENSE`](LICENSE) file. The code
+is open source and free for everyone. The AGPL's copyleft terms apply: in
+particular, if you run a modified version of StreamNet CLI to provide a network
+service, you must make the complete corresponding source code of your modified
+version available to the users of that service.
+
+This is the right choice for individuals, hobbyists, researchers, and any
+project that is itself happy to comply with the AGPL.
+
+## 2. Commercial license (alternative)
+
+The AGPL is deliberately strong copyleft. Some organizations cannot or do not
+want to comply with its source-disclosure requirements — for example, a company
+that wishes to:
+
+- integrate StreamNet CLI (or parts of it) into a **proprietary, closed-source**
+  product or internal system without releasing their own source;
+- redistribute StreamNet CLI as part of a commercial offering without the AGPL's
+  network-use source-disclosure obligations;
+- obtain a warranty, indemnification, or formal support terms;
+- otherwise use the software under terms incompatible with the AGPL.
+
+For these cases, a **separate commercial license** is available from the
+copyright holder. Under a commercial license, the AGPL obligations do not apply,
+and terms are negotiated directly.
+
+The copyright holder (Eduardo Borjas) retains full rights to offer StreamNet CLI
+under commercial terms in addition to the AGPL. Purchasing a commercial license
+does not affect the public's continued right to use the AGPL-licensed version.
+
+### Why dual licensing (and not MIT/Apache)
+
+Permissive licenses such as MIT and Apache-2.0 are **intentionally not used**:
+they would allow a company to take this work, build a proprietary product on top
+of it, and resell it **without any agreement with — or contribution back to —**
+the author. The AGPL keeps the public version free and open while reserving the
+commercial path for organizations that need proprietary terms, which they obtain
+by purchasing a license.
+
+## Contact
+
+To obtain a commercial license, or to ask which license fits your use case:
+
+**Eduardo Borjas** — eduardoa.borjas@gmail.com
+
+Please include a brief description of your intended use and your organization.
+
+---
+
+Copyright (c) 2026 Eduardo Borjas. All rights reserved.
+"StreamNet" and the StreamNet CLI name are used by the author to identify this
+project; the commercial license does not grant trademark rights except as
+expressly agreed in writing.
