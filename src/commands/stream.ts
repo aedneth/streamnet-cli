@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import type { CommandContext } from '../registry/types.js';
 import type { OutputContext } from '../agent/output.js';
 import { startStream } from '../core/torrent/engine.js';
@@ -6,6 +7,11 @@ import { isMkv } from '../core/torrent/select.js';
 import { spawnVlc, waitForVlc } from '../core/player/vlc.js';
 import { ExitCode, fail } from '../agent/exit.js';
 import { formatBytes } from '../util/format.js';
+import {
+  fetchSubtitle,
+  osConfigFrom,
+  queryFromFileName,
+} from '../core/subtitles/fetch.js';
 
 export interface StreamInput {
   source: string;
@@ -57,11 +63,37 @@ export async function streamHandler(
 
   try {
     let subtitleFile: string | undefined;
-    const skipSubs = input.noSubs || isMkv(info.fileName);
+    const haveKey = Boolean(ctx.config.opensubtitles.apiKey);
+    const skipSubs = input.noSubs || isMkv(info.fileName) || !haveKey;
+
+    if (input.noSubs) {
+      // explicitly disabled
+    } else if (isMkv(info.fileName)) {
+      ctx.output.info('MKV detected — using embedded subtitles, skipping search.');
+    } else if (!haveKey) {
+      ctx.output.warn(
+        'Non-MKV file but no OpenSubtitles key — playing without subtitles.',
+      );
+    }
 
     if (!skipSubs) {
-      // Subtitle search happens in v0.3; for now inform the user
-      ctx.output.info('Non-MKV file detected. Subtitle search will be added in v0.3.');
+      // Best-effort: a live stream has no complete local file, so search by title.
+      // Never fail the stream over a subtitle problem.
+      try {
+        const langs = input.subLang ? [input.subLang] : undefined;
+        const sub = await fetchSubtitle({
+          cfg: osConfigFrom(ctx.config),
+          query: queryFromFileName(info.fileName),
+          languages: langs,
+          outDir: tmpdir(),
+        });
+        subtitleFile = sub.path;
+        ctx.output.success(`Subtitle (${sub.language}) → ${sub.path}`);
+      } catch (err) {
+        ctx.output.warn(
+          `Subtitle search failed, continuing without: ${(err as Error).message}`,
+        );
+      }
     }
 
     const vlcProc = spawnVlc({

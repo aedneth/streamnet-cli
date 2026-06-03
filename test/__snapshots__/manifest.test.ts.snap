@@ -63,6 +63,27 @@ exports[`manifest > is a stable, serializable shape (snapshot of command ids + f
     "id": "config",
   },
   {
+    "args": [
+      "file",
+    ],
+    "flags": [
+      "lang",
+      "query",
+    ],
+    "id": "subs",
+  },
+  {
+    "args": [
+      "source",
+    ],
+    "flags": [
+      "file-index",
+      "no-subs",
+      "out",
+    ],
+    "id": "download",
+  },
+  {
     "args": [],
     "flags": [],
     "id": "manifest",
