@@ -7,6 +7,8 @@ import { playHandler, renderPlay } from '../commands/play.js';
 import { setupHandler } from '../commands/setup.js';
 import { doctorHandler, renderDoctor, type DoctorResult } from '../commands/doctor.js';
 import { configHandler, renderConfig } from '../commands/config.js';
+import { subsHandler, renderSubs } from '../commands/subs.js';
+import { downloadHandler, renderDownload } from '../commands/download.js';
 
 const COMMON_EXIT_CODES = [
   { code: ExitCode.OK, meaning: 'Success' },
@@ -243,6 +245,92 @@ export const COMMAND_SPECS: CommandSpec[] = [
     ],
     handler: configHandler as unknown as CommandSpec['handler'],
     render: renderConfig as unknown as CommandSpec['render'],
+  },
+
+  {
+    id: 'subs',
+    summary: 'Find and download subtitles for a local video (by file hash).',
+    description:
+      'Computes the OpenSubtitles/VLSub moviehash of a local file and downloads the ' +
+      'best matching subtitle as `<name>.<lang>.srt` beside it. Falls back to a text ' +
+      'query. Requires an OpenSubtitles API key in config.',
+    args: [
+      {
+        name: 'file',
+        description: 'Path to a local video file (or any path when using --query)',
+        required: true,
+      },
+    ],
+    flags: [
+      {
+        long: 'lang',
+        description: 'Comma-separated language codes, preference order (e.g. es,en)',
+        schema: z.string().optional(),
+      },
+      {
+        long: 'query',
+        description: 'Force a text search (Title Year) instead of/after a hash match',
+        schema: z.string().optional(),
+      },
+    ],
+    exitCodes: [
+      ...COMMON_EXIT_CODES,
+      { code: ExitCode.SUBS_NOT_FOUND, meaning: 'No matching subtitles found' },
+      { code: ExitCode.AUTH, meaning: 'OpenSubtitles API key missing/rejected' },
+      { code: ExitCode.NETWORK, meaning: 'OpenSubtitles unreachable' },
+    ],
+    examples: [
+      'streamnet subs ~/Videos/Movie.mp4',
+      'streamnet subs ~/Videos/Movie.mp4 --lang es,en',
+      'streamnet subs movie --query "Dune Part Two 2024" --json',
+    ],
+    handler: subsHandler as unknown as CommandSpec['handler'],
+    render: renderSubs as unknown as CommandSpec['render'],
+  },
+
+  {
+    id: 'download',
+    summary: 'Download a torrent to disk (with subtitle auto-fetch for non-MKV).',
+    description:
+      'Full download to the configured download directory, with progress. On ' +
+      'completion, non-MKV files trigger a subtitle search automatically (unless --no-subs).',
+    args: [
+      {
+        name: 'source',
+        description: 'Magnet link, .torrent URL, or infohash. Use - to read from stdin.',
+        required: true,
+      },
+    ],
+    flags: [
+      {
+        long: 'out',
+        description: 'Output directory (overrides config.downloadDir)',
+        schema: z.string().optional(),
+      },
+      {
+        long: 'file-index',
+        description: 'Force a specific file index within the torrent',
+        schema: z.number().optional(),
+      },
+      {
+        long: 'no-subs',
+        description: 'Skip the post-download subtitle search',
+        schema: z.boolean(),
+        default: false,
+      },
+    ],
+    exitCodes: [
+      ...COMMON_EXIT_CODES,
+      { code: ExitCode.DEP_MISSING, meaning: 'webtorrent not installed' },
+      { code: ExitCode.TORRENT_UNPLAYABLE, meaning: 'No peers / metadata timeout' },
+      { code: ExitCode.NETWORK, meaning: 'Write failure or download error' },
+    ],
+    examples: [
+      'streamnet download "magnet:?xt=urn:btih:..."',
+      'streamnet download "magnet:?xt=urn:btih:..." --out ~/Videos --json',
+    ],
+    handler: downloadHandler as unknown as CommandSpec['handler'],
+    render: renderDownload as unknown as CommandSpec['render'],
   },
 
   {
