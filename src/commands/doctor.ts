@@ -9,19 +9,19 @@ export interface DoctorResult {
 }
 
 export async function doctorHandler(
-  _ctx: CommandContext,
+  ctx: CommandContext,
   _input: Record<string, unknown>,
 ): Promise<DoctorResult> {
-  const checks = await runAllChecks();
+  const checks = await runAllChecks(ctx.config);
   const allOk = checks.every((c) => c.ok);
   return { checks, allOk };
 }
 
 export function renderDoctor(data: DoctorResult, _output: OutputContext): void {
   for (const check of data.checks) {
-    const icon = check.ok ? pc.green('✔') : pc.red('✖');
+    const icon = !check.ok ? pc.red('✖') : check.warn ? pc.yellow('⚠') : pc.green('✔');
     process.stdout.write(`  ${icon}  ${check.name.padEnd(14)} ${check.message}\n`);
-    if (!check.ok && check.hint) {
+    if ((!check.ok || check.warn) && check.hint) {
       process.stdout.write(`         ${pc.dim(check.hint)}\n`);
     }
   }

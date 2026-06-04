@@ -1,12 +1,19 @@
+import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
 import { findVlc } from '../player/detect.js';
 import { httpGetText } from '../../util/http.js';
 import { logger } from '../../util/logger.js';
+import { downloadsDir } from '../../config/paths.js';
+import type { Config } from '../../config/schema.js';
 
 export interface CheckResult {
   name: string;
+  /** Contributes to `allOk` / the doctor exit code. A `warn` is reported with ok=true. */
   ok: boolean;
   message: string;
   hint?: string;
+  /** Advisory-only: surfaced as a warning but does not fail doctor. */
+  warn?: boolean;
 }
 
 async function checkVlc(): Promise<CheckResult> {
@@ -64,12 +71,45 @@ async function checkWebtorrent(): Promise<CheckResult> {
   }
 }
 
-export async function runAllChecks(): Promise<CheckResult[]> {
+async function checkDownloadDir(dir: string): Promise<CheckResult> {
+  try {
+    mkdirSync(dir, { recursive: true });
+    const probe = join(dir, `.streamnet-write-test-${process.pid}`);
+    writeFileSync(probe, 'ok');
+    rmSync(probe, { force: true });
+    return { name: 'downloadDir', ok: true, message: `Writable: ${dir}` };
+  } catch {
+    return {
+      name: 'downloadDir',
+      ok: false,
+      message: `Download directory not writable: ${dir}`,
+      hint: 'Set a writable path: streamnet config set downloadDir <path>',
+    };
+  }
+}
+
+async function checkOpenSubtitles(config?: Config): Promise<CheckResult> {
+  if (config?.opensubtitles.apiKey) {
+    return { name: 'opensubtitles', ok: true, message: 'API key configured' };
+  }
+  return {
+    name: 'opensubtitles',
+    ok: true,
+    warn: true,
+    message: 'No API key — subtitle search disabled (optional)',
+    hint: 'Free key at https://www.opensubtitles.com/consumers, then: streamnet config set opensubtitles.apiKey <key>',
+  };
+}
+
+export async function runAllChecks(config?: Config): Promise<CheckResult[]> {
+  const downloadDir = config?.downloadDir ?? downloadsDir();
   const results = await Promise.allSettled([
     checkNode(),
     checkVlc(),
     checkWebtorrent(),
     checkNetwork(),
+    checkDownloadDir(downloadDir),
+    checkOpenSubtitles(config),
   ]);
 
   return results.map((r) => {

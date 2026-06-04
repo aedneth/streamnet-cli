@@ -6,7 +6,35 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+## [1.0.0] — 2026-06-04
+
+First stable release: the complete terminal pipeline — search → in-process
+WebTorrent stream → native VLC → hash-based subtitles — plus a full-download
+mode and a standalone subtitle command. Public, semver-stable command surface
+and `--json` envelope contract.
+
+### Added
+
+- Subtitle pipeline: OpenSubtitles/VLSub `moviehash` (size + first/last 64 KiB
+  checksum), OpenSubtitles REST v1 client (hash + text search, ranked download),
+  and a `subs <file>` command that writes `<name>.<lang>.srt` beside the video.
+- `download <source>` command — full torrent download to the configured
+  directory with progress, plus automatic subtitle fetch for non-MKV files.
+- `stream`/`play`: non-MKV streams now best-effort fetch subtitles by title and
+  pass `--sub-file` to VLC (never fails the stream on a subtitle error).
+- `doctor`: download-directory write check and an advisory (warn-only)
+  OpenSubtitles API-key check that does not flip the exit code.
+
+### Fixed
+
+- Flag arity: optional/default-wrapped flags (`z.string().optional()`,
+  `z.number().optional()`) were misclassified as boolean, so value-taking flags
+  like `--container`, `--quality`, `--indexer`, `--sub-lang`, `--query`, `--out`
+  silently swallowed no argument ("too many arguments"). The registry now
+  unwraps Optional/Default/Nullable to the underlying type for both flag arity
+  and numeric coercion.
+- Agent-mode subprocess tests (`config get`) given an explicit 15s timeout so
+  Node startup under parallel test load no longer trips the 5s default.
 
 ## [0.1.0] — 2026-06-02
 
@@ -38,5 +66,6 @@ Nothing yet.
 - CodeQL workflow: guard with `if: github.event.repository.private == false` to
   prevent spurious failures on private repos without GitHub Advanced Security.
 
-[Unreleased]: https://github.com/aedneth/streamnet-cli/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/aedneth/streamnet-cli/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/aedneth/streamnet-cli/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/aedneth/streamnet-cli/releases/tag/v0.1.0

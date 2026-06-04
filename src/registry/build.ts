@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import type { z } from 'zod';
 import type { CommandSpec, CommandContext } from './types.js';
 import { ExitCode, StreamNetError, fail } from '../agent/exit.js';
 
@@ -24,9 +25,9 @@ export function buildCommand(spec: CommandSpec, ctx: () => CommandContext): Comm
 
   for (const flag of spec.flags ?? []) {
     const short = flag.short ? `-${flag.short}, ` : '';
-    const isBoolean =
-      flag.schema._def?.typeName === 'ZodBoolean' ||
-      flag.schema._def?.typeName === 'ZodOptional';
+    // Only true booleans are value-less. Optional/default-wrapped strings and
+    // numbers (e.g. `z.string().optional()`) still take a <value> argument.
+    const isBoolean = unwrappedTypeName(flag.schema) === 'ZodBoolean';
     const syntax = isBoolean
       ? `${short}--${flag.long}`
       : `${short}--${flag.long} <value>`;
@@ -95,12 +96,13 @@ function buildInput(
   for (const flag of spec.flags ?? []) {
     const envVal = flag.env ? process.env[flag.env] : undefined;
     const cliVal = opts[camel(flag.long)];
-    const typeName = flag.schema._def?.typeName as string | undefined;
+    const typeName = unwrappedTypeName(flag.schema);
     if (envVal !== undefined) {
       input[camel(flag.long)] = coerceEnv(envVal, typeName);
     } else if (cliVal !== undefined) {
       // Coerce string values for numeric flags (Commander always gives strings)
-      input[camel(flag.long)] = typeName === 'ZodNumber' ? coerceNum(cliVal, flag.long) : cliVal;
+      input[camel(flag.long)] =
+        typeName === 'ZodNumber' ? coerceNum(cliVal, flag.long) : cliVal;
     } else if (flag.default !== undefined) {
       input[camel(flag.long)] = flag.default;
     }
@@ -118,8 +120,24 @@ function coerceEnv(val: string, typeName: string | undefined): unknown {
 
 function coerceNum(val: unknown, flagName: string): number {
   const n = Number(val);
-  if (Number.isNaN(n)) fail(ExitCode.USAGE, `--${flagName} requires a numeric value, got: ${String(val)}`);
+  if (Number.isNaN(n))
+    fail(ExitCode.USAGE, `--${flagName} requires a numeric value, got: ${String(val)}`);
   return n;
+}
+
+/**
+ * Resolve the underlying Zod type name, unwrapping Optional/Default/Nullable
+ * wrappers. `z.string().optional()` reports `ZodString`, not `ZodOptional` — so
+ * flag-arity and numeric-coercion decisions look at the real value type.
+ */
+export function unwrappedTypeName(schema: z.ZodTypeAny): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let s: any = schema;
+  const wrappers = new Set(['ZodOptional', 'ZodDefault', 'ZodNullable']);
+  while (s?._def && wrappers.has(s._def.typeName)) {
+    s = s._def.innerType;
+  }
+  return s?._def?.typeName as string | undefined;
 }
 
 function camel(s: string): string {
