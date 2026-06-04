@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-06-04
+
+First stable release: the complete terminal pipeline — search → in-process
+WebTorrent stream → native VLC → hash-based subtitles — plus a full-download
+mode and a standalone subtitle command. Public, semver-stable command surface
+and `--json` envelope contract.
+
 ### Added
 
 - Subtitle pipeline: OpenSubtitles/VLSub `moviehash` (size + first/last 64 KiB
@@ -26,6 +33,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   silently swallowed no argument ("too many arguments"). The registry now
   unwraps Optional/Default/Nullable to the underlying type for both flag arity
   and numeric coercion.
+- Agent-mode subprocess tests (`config get`) given an explicit 15s timeout so
+  Node startup under parallel test load no longer trips the 5s default.
 
 ## [0.1.0] — 2026-06-02
 
@@ -57,5 +66,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CodeQL workflow: guard with `if: github.event.repository.private == false` to
   prevent spurious failures on private repos without GitHub Advanced Security.
 
-[Unreleased]: https://github.com/aedneth/streamnet-cli/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/aedneth/streamnet-cli/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/aedneth/streamnet-cli/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/aedneth/streamnet-cli/releases/tag/v0.1.0

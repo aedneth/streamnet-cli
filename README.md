@@ -149,13 +149,13 @@ streamnet config get opensubtitles.apiKey   # secrets are redacted on display
 
 ## Roadmap
 
-| Version    | Status     | Highlights                                                                                                                    |
-| ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **v0.1.0** | ✅ shipped | Search (torrents-csv + YTS), WebTorrent engine, native VLC spawn, setup/doctor, agent-native `--json` / exit codes / manifest |
-| **v0.2.0** | ✅ shipped | OpenSubtitles hash-based subtitle fetch + VLC injection (`subs`); `download` command with auto-subs                           |
-| **v0.3.0** | planned    | MCP server (`streamnet mcp`); Real-debrid / Premiumize resolver; additional indexers (1337x, RARBG mirrors)                   |
-| **v0.4.0** | planned    | Watch history + resume; `streamnet library` catalog; shell completions                                                        |
-| **v1.0.0** | future     | Stable public API, binary releases, Homebrew tap, Scoop bucket                                                                |
+| Version    | Status     | Highlights                                                                                                                       |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **v0.1.0** | ✅ shipped | Search (torrents-csv + YTS), WebTorrent engine, native VLC spawn, setup/doctor, agent-native `--json` / exit codes / manifest    |
+| **v1.0.0** | ✅ shipped | First stable release — full pipeline: `play`/`stream`/`download`/`subs`, OpenSubtitles hash-based subtitles + VLC injection, stable `--json` contract |
+| **v1.1.0** | planned    | MCP server (`streamnet mcp`); Real-debrid / Premiumize resolver; additional indexers (1337x, RARBG mirrors)                      |
+| **v1.2.0** | planned    | Watch history + resume; `streamnet library` catalog; shell completions                                                          |
+| **future** | planned    | Standalone binary releases (SEA), Homebrew tap, Scoop bucket                                                                     |
 
 ## Contributing
 
