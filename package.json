@@ -66,7 +66,7 @@
     "picocolors": "^1.1.1"
   },
   "optionalDependencies": {
-    "webtorrent": "^2.5.1"
+    "webtorrent": "^3.0.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
