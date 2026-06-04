@@ -13,6 +13,8 @@ describe('manifest', () => {
     expect(ids).toContain('setup');
     expect(ids).toContain('doctor');
     expect(ids).toContain('config');
+    expect(ids).toContain('subs');
+    expect(ids).toContain('download');
   });
 
   it('documents the full exit code table', () => {

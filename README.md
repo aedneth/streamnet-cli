@@ -69,9 +69,16 @@ streamnet doctor    # verifies VLC, webtorrent, Node, network
 streamnet search "Blade Runner 2049"          # health-ranked results
 streamnet play   "Blade Runner 2049" --yes    # search + best result + stream
 streamnet stream "magnet:?xt=urn:btih:..."     # stream a specific torrent
+streamnet download "magnet:?xt=urn:btih:..."   # full download + auto-subs (non-MKV)
+streamnet subs   ~/Videos/Movie.mp4 --lang es,en  # fetch subtitles by file hash
 streamnet config list                          # view configuration
 streamnet manifest                             # machine-readable command catalog
 ```
+
+> Subtitles need a free OpenSubtitles API key:
+> `streamnet config set opensubtitles.apiKey <key>` (key from
+> <https://www.opensubtitles.com/consumers>). MKV files use their embedded track
+> and skip the lookup automatically.
 
 ### Agent / scripting examples
 
@@ -142,13 +149,13 @@ streamnet config get opensubtitles.apiKey   # secrets are redacted on display
 
 ## Roadmap
 
-| Version | Status | Highlights |
-| ------- | ------ | ---------- |
-| **v0.1.0** | ✅ shipped | Search (torrents-csv + YTS), WebTorrent engine, native VLC spawn, setup/doctor, agent-native `--json` / exit codes / manifest |
-| **v0.2.0** | planned | OpenSubtitles hash-based subtitle fetch + VLC injection; MCP server (`streamnet mcp`) |
-| **v0.3.0** | planned | Real-debrid / Premiumize resolver; additional indexers (1337x, RARBG mirrors) |
-| **v0.4.0** | planned | Watch history + resume; `streamnet library` catalog; shell completions |
-| **v1.0.0** | future | Stable public API, binary releases, Homebrew tap, Scoop bucket |
+| Version    | Status     | Highlights                                                                                                                       |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **v0.1.0** | ✅ shipped | Search (torrents-csv + YTS), WebTorrent engine, native VLC spawn, setup/doctor, agent-native `--json` / exit codes / manifest    |
+| **v1.0.0** | ✅ shipped | First stable release — full pipeline: `play`/`stream`/`download`/`subs`, OpenSubtitles hash-based subtitles + VLC injection, stable `--json` contract |
+| **v1.1.0** | planned    | MCP server (`streamnet mcp`); Real-debrid / Premiumize resolver; additional indexers (1337x, RARBG mirrors)                      |
+| **v1.2.0** | planned    | Watch history + resume; `streamnet library` catalog; shell completions                                                          |
+| **future** | planned    | Standalone binary releases (SEA), Homebrew tap, Scoop bucket                                                                     |
 
 ## Contributing
 

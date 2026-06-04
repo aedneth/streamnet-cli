@@ -1,40 +1,38 @@
 # Security Policy
 
-## Supported versions
+## Supported Versions
 
-StreamNet CLI is pre-1.0. Security fixes are applied to the latest released
-minor version. Once 1.0.0 ships, the latest minor will be supported.
+| Version | Supported |
+|---------|-----------|
+| latest  | ✅        |
+| < latest | ❌ — update to latest |
 
-| Version    | Supported |
-| ---------- | --------- |
-| latest 0.x | ✅        |
-| older 0.x  | ❌        |
+## Reporting a Vulnerability
 
-## Reporting a vulnerability
+**Do not open a public GitHub issue for security vulnerabilities.**
 
-**Please do not open a public GitHub issue for security vulnerabilities.**
+Email: eduardoa.borjas@gmail.com
 
-Report privately via one of:
+Include:
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Any suggested fix (optional)
 
-- GitHub's **private vulnerability reporting** (Security → Report a vulnerability)
-- Email: **eduardoa.borjas@gmail.com** with subject `[streamnet-cli security]`
+You will receive a response within 48 hours. If confirmed, a patch will be released within 7 days.
 
-Please include:
+## Supply Chain Security
 
-- a description of the issue and its impact,
-- steps to reproduce or a proof of concept,
-- affected version(s) and platform.
+This project implements zero-trust npm security:
 
-You can expect an acknowledgement within **5 business days** and a status update
-within **15 business days**. Coordinated disclosure is appreciated — we'll agree
-a disclosure timeline with you once the issue is confirmed.
+- **`ignore-scripts=true`** in `.npmrc` — blocks all postinstall/preinstall lifecycle scripts during `npm install`/`npm ci`. Prevents supply chain attacks via compromised transitive dependencies.
+- **Explicit native module whitelist** — only named, reviewed native modules (listed in CI) are allowed to compile. All others are blocked.
+- **Pinned GitHub Actions** — all Actions are pinned to a specific commit SHA, not a mutable tag. This prevents compromised Action tags from injecting malicious steps.
+- **`npm publish --provenance`** — every published release includes a signed SLSA attestation linking the package to the exact GitHub Actions run that built it. Verify with: `npm audit signatures <package>@<version>`
+- **`npm ci` in all CI jobs** — never `npm install`. Enforces exact cryptographic hash matching against `package-lock.json`.
+- **Minimum permissions** — each CI job declares only the permissions it needs. Default is `permissions: {}` (deny all).
+- **Weekly automated audit** — the Security Audit workflow runs every Monday at 09:00 UTC and fails on any moderate or higher vulnerability.
 
-## Scope notes
+## Known Mitigations
 
-StreamNet spawns native VLC and runs a local HTTP stream server bound to
-`127.0.0.1`. Reports involving local privilege escalation, the stream server, the
-VLC IPC interface, subtitle handling, or indexer response parsing are in scope.
-
-StreamNet does not host or distribute content; it searches third-party indexers
-and streams via the BitTorrent network. Legal/abuse concerns about specific
-content are out of scope for this security policy.
+Any known vulnerability mitigations (e.g., transitive dependency overrides) are documented in the relevant CI workflow files with inline comments.
