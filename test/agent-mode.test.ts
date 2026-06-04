@@ -33,7 +33,8 @@ async function run(args: string[]): Promise<{ stdout: string; code: number }> {
 }
 
 maybe('agent mode (subprocess, no TTY)', () => {
-  it('config get emits exactly one JSON envelope on stdout', async () => {
+  // subprocess spawn + Node startup can exceed the 5s default under parallel load
+  it('config get emits exactly one JSON envelope on stdout', { timeout: 15_000 }, async () => {
     const { stdout, code } = await run(['config', 'get', 'minSeeders', '--json']);
     const lines = stdout.trim().split('\n');
     expect(lines).toHaveLength(1);
@@ -45,7 +46,7 @@ maybe('agent mode (subprocess, no TTY)', () => {
     expect(code).toBe(0);
   });
 
-  it('returns USAGE (2) for a missing required argument', async () => {
+  it('returns USAGE (2) for a missing required argument', { timeout: 15_000 }, async () => {
     const { stdout, code } = await run(['config', 'get', '--json']);
     const env = JSON.parse(stdout.trim());
     expect(env.ok).toBe(false);

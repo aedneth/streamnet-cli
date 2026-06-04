@@ -1,6 +1,6 @@
 {
   "name": "streamnet-cli",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Torrent search + in-process WebTorrent streaming to native VLC with hash-based subtitles. Agent-native by design.",
   "type": "module",
   "license": "AGPL-3.0-or-later",
