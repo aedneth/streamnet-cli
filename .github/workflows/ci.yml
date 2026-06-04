@@ -37,6 +37,9 @@ jobs:
       # prebuild-install. Rebuild only if pre-built binary is missing.
       # These are whitelisted: all are source-available and provide WebRTC/UDP primitives.
       - name: Rebuild native WebTorrent dependencies
+        # Force bash: on Windows the default shell is pwsh, where `2>/dev/null`
+        # is parsed as Out-File to `D:\dev\null` and fails the step.
+        shell: bash
         run: |
           npm rebuild utp-native bufferutil utf-8-validate 2>/dev/null || true
           npm rebuild node-datachannel fs-native-extensions 2>/dev/null || true
