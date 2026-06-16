@@ -61,7 +61,7 @@
     "zod-to-json-schema": "^3.23.2",
     "cheerio": "^1.0.0",
     "execa": "^9.5.1",
-    "p-limit": "^6.1.0",
+    "p-limit": "^7.3.0",
     "fast-xml-parser": "^4.5.0",
     "picocolors": "^1.1.1"
   },
